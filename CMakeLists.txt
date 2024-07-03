@@ -3,8 +3,9 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib C)
 
-set(VERSION "1.3")
+set(VERSION "1.3.1")
 
+option(ZLIB_BUILD_EXAMPLES "Enable Zlib Examples" ON)
 option(ZLIB_WITHOUT_INSTALL_ALL "Build Zlib without installing all artifacts." OFF)
 option(ZLIB_WITHOUT_INSTALL_FILES "Build Zlib without installing files." OFF)
 option(ZLIB_WITHOUT_INSTALL_HEADERS "Build Zlib without installing headers." OFF)
@@ -31,6 +32,9 @@ check_include_file(stddef.h    HAVE_STDDEF_H)
 
 if(UNIX)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+if(ZLIB_WITHOUT_TEST_APPS)
+    set(ZLIB_BUILD_EXAMPLES OFF)
 endif()
 
 #
@@ -160,7 +164,9 @@ if(MINGW)
 endif(MINGW)
 
 add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
@@ -178,7 +184,7 @@ endif()
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
    set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
-   if(NOT APPLE)
+   if(NOT APPLE AND NOT(CMAKE_SYSTEM_NAME STREQUAL AIX))
      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
 elseif(WIN32)
@@ -206,8 +212,7 @@ endif()
 #============================================================================
 # Example binaries
 #============================================================================
-
-if(NOT ZLIB_WITHOUT_TEST_APPS)
+if(ZLIB_BUILD_EXAMPLES)
     add_executable(example test/example.c)
     target_link_libraries(example zlib)
     add_test(example example)
