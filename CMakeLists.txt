@@ -26,7 +26,7 @@ include(CheckIncludeFile)
 include(CheckCSourceCompiles)
 enable_testing()
 
-if(WIN32)
+if(BUILD_WITH_COMPILER_PRECHECK AND WIN32)
     set(HAVE_SYS_TYPES_H TRUE)
     set(HAVE_STDINT_H TRUE)
     set(HAVE_STDDEF_H TRUE)
@@ -59,7 +59,7 @@ endif()
 if(HAVE_STDDEF_H)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -DHAVE_STDDEF_H)
 endif()
-if(WIN32)
+if(BUILD_WITH_COMPILER_PRECHECK AND WIN32)
     set(HAVE_OFF64_T FALSE)
 else()
     check_type_size(off64_t OFF64_T)
@@ -72,7 +72,7 @@ set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 #
 # Check for fseeko
 #
-if(WIN32)
+if(BUILD_WITH_COMPILER_PRECHECK AND WIN32)
     set(HAVE_FSEEKO FALSE)
 else()
     check_function_exists(fseeko HAVE_FSEEKO)
@@ -84,7 +84,7 @@ endif()
 #
 # Check for unistd.h
 #
-if(WIN32)
+if(BUILD_WITH_COMPILER_PRECHECK AND WIN32)
     set(Z_HAVE_UNISTD_H FALSE)
 else()
     check_include_file(unistd.h Z_HAVE_UNISTD_H)
