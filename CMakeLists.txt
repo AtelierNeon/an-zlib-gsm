@@ -92,7 +92,11 @@ endif()
 # Check to see if we have large file support
 #
 set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE=1)
-check_type_size(off64_t OFF64_T)
+if(BUILD_WITH_COMPILER_PRECHECK AND WIN32)
+    set(HAVE_OFF64_T FALSE)
+else()
+    check_type_size(off64_t OFF64_T)
+endif()
 unset(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 
 #
@@ -107,7 +111,11 @@ endif()
 #
 # Check for stdarg.h
 #
-check_include_file(stdarg.h HAVE_STDARG_H)
+if(BUILD_WITH_COMPILER_PRECHECK AND WIN32)
+    set(HAVE_STDARG_H TRUE)
+else()
+    check_include_file(stdarg.h HAVE_STDARG_H)
+endif()
 
 #
 # Check for unistd.h
