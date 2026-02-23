@@ -32,6 +32,11 @@ option(ZLIB_WITHOUT_INSTALL_FILES "Build Zlib without installing files." OFF)
 option(ZLIB_WITHOUT_INSTALL_HEADERS "Build Zlib without installing headers." OFF)
 option(ZLIB_WITHOUT_INSTALL_LIBRARIES "Build Zlib without installing libraries." OFF)
 option(ZLIB_WITHOUT_TEST_APPS "Build Zlib without test apps." OFF)
+if(ZLIB_WITHOUT_TEST_APPS)
+    set(ZLIB_BUILD_TESTING OFF)
+else()
+    set(ZLIB_BUILD_TESTING ON)
+endif()
 
 get_property(IS_MULTI GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
@@ -258,42 +263,52 @@ endif(ZLIB_BUILD_STATIC)
 
 if(ZLIB_INSTALL)
     if(ZLIB_BUILD_SHARED)
-        install(
-            TARGETS zlib
-            COMPONENT Runtime
-            EXPORT zlibSharedExport
-            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-        install(
-            EXPORT zlibSharedExport
-            FILE ZLIB-shared.cmake
-            NAMESPACE ZLIB::
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+        if(NOT ZLIB_WITHOUT_INSTALL_LIBRARIES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+            install(
+                TARGETS zlib
+                COMPONENT Runtime
+                EXPORT zlibSharedExport
+                RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+                ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        endif()
+        if(NOT ZLIB_WITHOUT_INSTALL_FILES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+            install(
+                EXPORT zlibSharedExport
+                FILE ZLIB-shared.cmake
+                NAMESPACE ZLIB::
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+        endif()
 
         if(MSVC)
-            install(
-                FILES $<TARGET_PDB_FILE:zlib>
-                COMPONENT Runtime
-                DESTINATION ${CMAKE_INSTALL_BINDIR}
-                CONFIGURATIONS Debug OR RelWithDebInfo
-                OPTIONAL)
+            if(NOT ZLIB_WITHOUT_INSTALL_LIBRARIES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+                install(
+                    FILES $<TARGET_PDB_FILE:zlib>
+                    COMPONENT Runtime
+                    DESTINATION ${CMAKE_INSTALL_BINDIR}
+                    CONFIGURATIONS Debug OR RelWithDebInfo
+                    OPTIONAL)
+            endif()
         endif(MSVC)
     endif(ZLIB_BUILD_SHARED)
 
     if(ZLIB_BUILD_STATIC)
-        install(
-            TARGETS zlibstatic
-            COMPONENT Development
-            EXPORT zlibStaticExport
-            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-        install(
-            EXPORT zlibStaticExport
-            FILE ZLIB-static.cmake
-            NAMESPACE ZLIB::
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+        if(NOT ZLIB_WITHOUT_INSTALL_LIBRARIES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+            install(
+                TARGETS zlibstatic
+                COMPONENT Development
+                EXPORT zlibStaticExport
+                RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+                ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        endif()
+        if(NOT ZLIB_WITHOUT_INSTALL_FILES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+            install(
+                EXPORT zlibStaticExport
+                FILE ZLIB-static.cmake
+                NAMESPACE ZLIB::
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+        endif()
     endif(ZLIB_BUILD_STATIC)
 
     configure_package_config_file(
@@ -306,31 +321,37 @@ if(ZLIB_INSTALL)
         VERSION "${zlib_VERSION}"
         COMPATIBILITY AnyNewerVersion)
 
-    install(FILES ${zlib_BINARY_DIR}/ZLIBConfig.cmake
-                  ${zlib_BINARY_DIR}/ZLIBConfigVersion.cmake
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
-    install(
-        FILES ${ZLIB_PUBLIC_HDRS}
-        COMPONENT Development
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-    install(
-        FILES zlib.3
-        COMPONENT Docs
-        DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
-    install(
-        FILES LICENSE
-              doc/algorithm.txt
-              doc/crc-doc.1.0.pdf
-              doc/rfc1950.txt
-              doc/rfc1951.txt
-              doc/rfc1952.txt
-              doc/txtvsbin.txt
-        COMPONENT Docs
-        DESTINATION "${CMAKE_INSTALL_DOCDIR}/zlib")
-    install(
-        FILES ${ZLIB_PC}
-        COMPONENT Development
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    if(NOT ZLIB_WITHOUT_INSTALL_FILES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+        install(FILES ${zlib_BINARY_DIR}/ZLIBConfig.cmake
+                      ${zlib_BINARY_DIR}/ZLIBConfigVersion.cmake
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+    endif()
+    if(NOT ZLIB_WITHOUT_INSTALL_HEADERS AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+        install(
+            FILES ${ZLIB_PUBLIC_HDRS}
+            COMPONENT Development
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    endif()
+    if(NOT ZLIB_WITHOUT_INSTALL_FILES AND NOT ZLIB_WITHOUT_INSTALL_ALL)
+        install(
+            FILES zlib.3
+            COMPONENT Docs
+            DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
+        install(
+            FILES LICENSE
+                  doc/algorithm.txt
+                  doc/crc-doc.1.0.pdf
+                  doc/rfc1950.txt
+                  doc/rfc1951.txt
+                  doc/rfc1952.txt
+                  doc/txtvsbin.txt
+            COMPONENT Docs
+            DESTINATION "${CMAKE_INSTALL_DOCDIR}/zlib")
+        install(
+            FILES ${ZLIB_PC}
+            COMPONENT Development
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    endif()
 endif(ZLIB_INSTALL)
 
 # ============================================================================
