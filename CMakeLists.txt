@@ -199,11 +199,19 @@ if(ZLIB_BUILD_SHARED)
                                               VERSION ${INSTALL_VERSION})
     endif(NOT CYGWIN)
 
-    set_target_properties(
-        zlib
-        PROPERTIES DEFINE_SYMBOL ZLIB_DLL
-                   EXPORT_NAME ZLIB
-                   OUTPUT_NAME z)
+    if(UNIX)
+        set_target_properties(
+            zlib
+            PROPERTIES DEFINE_SYMBOL ZLIB_DLL
+                       EXPORT_NAME ZLIB
+                       OUTPUT_NAME z)
+    else()
+        set_target_properties(
+            zlib
+            PROPERTIES DEFINE_SYMBOL ZLIB_DLL
+                       EXPORT_NAME ZLIB
+                       OUTPUT_NAME libz)
+    endif()
     if(UNIX
         AND NOT APPLE
         AND NOT (CMAKE_SYSTEM_NAME STREQUAL AIX)
@@ -237,9 +245,15 @@ if(ZLIB_BUILD_STATIC)
                 $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_DEPRECATE>
                 $<$<BOOL:${MSVC}>:_CRT_NONSTDC_NO_DEPRECATE>
         PUBLIC $<$<BOOL:${HAVE_OFF64_T}>:_LARGEFILE64_SOURCE=1>)
-    set_target_properties(
-        zlibstatic PROPERTIES EXPORT_NAME ZLIBSTATIC OUTPUT_NAME
-                                                     z${zlib_static_suffix})
+    if(UNIX)
+        set_target_properties(
+            zlibstatic PROPERTIES EXPORT_NAME ZLIBSTATIC OUTPUT_NAME
+                                                         z${zlib_static_suffix})
+    else()
+        set_target_properties(
+            zlibstatic PROPERTIES EXPORT_NAME ZLIBSTATIC OUTPUT_NAME
+                                                         libz${zlib_static_suffix})
+    endif()
 endif(ZLIB_BUILD_STATIC)
 
 if(ZLIB_INSTALL)
