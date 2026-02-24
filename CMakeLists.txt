@@ -27,6 +27,7 @@ option(ZLIB_PREFIX "prefix for all types and library functions, see zconf.h.in"
        OFF)
 mark_as_advanced(ZLIB_PREFIX)
 
+option(ZLIB_WITHOUT_EXPORT_ALIAS "Build Zlib without exporting library alias." OFF)
 option(ZLIB_WITHOUT_INSTALL_ALL "Build Zlib without installing all artifacts." OFF)
 option(ZLIB_WITHOUT_INSTALL_FILES "Build Zlib without installing files." OFF)
 option(ZLIB_WITHOUT_INSTALL_HEADERS "Build Zlib without installing headers." OFF)
@@ -191,7 +192,9 @@ if(ZLIB_BUILD_SHARED)
     add_library(
         zlib SHARED ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS}
                     $<$<OR:$<BOOL:${WIN32}>,$<BOOL:${CYGWIN}>>:win32/zlib1.rc>)
-    add_library(ZLIB::ZLIB ALIAS zlib)
+    if(NOT ZLIB_WITHOUT_EXPORT_ALIAS)
+        add_library(ZLIB::ZLIB ALIAS zlib)
+    endif()
     target_include_directories(
         zlib
         PUBLIC $<BUILD_INTERFACE:${zlib_BINARY_DIR}>
@@ -244,7 +247,9 @@ endif(ZLIB_BUILD_SHARED)
 if(ZLIB_BUILD_STATIC)
     add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS}
                                   ${ZLIB_PRIVATE_HDRS})
-    add_library(ZLIB::ZLIBSTATIC ALIAS zlibstatic)
+    if(NOT ZLIB_WITHOUT_EXPORT_ALIAS)
+        add_library(ZLIB::ZLIBSTATIC ALIAS zlibstatic)
+    endif()
     target_include_directories(
         zlibstatic
         PUBLIC $<BUILD_INTERFACE:${zlib_BINARY_DIR}>
